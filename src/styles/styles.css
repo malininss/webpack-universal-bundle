@@ -1,0 +1,26 @@
+/* Тильда говорит, что нужно перейти в node_module. Дальше веб-пак поймет сам */
+@import "~normalize.css";
+@import "roboto.css";
+
+body {
+  font-family: 'Roboto', sans-serif;
+}
+
+.container {
+  padding-top: 2rem;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+h1 {
+  text-align: center;
+}
+
+.logo {
+   /*если установлена настройка с file-loader с изображением, то в css соберется файл отдельно*/
+  background-image: url('../assets/image.png');
+  background-size: cover;
+  height: 200px;
+  width: 200px;
+  margin: 0 auto;
+}
