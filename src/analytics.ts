@@ -1,14 +1,12 @@
 import * as $ from 'jquery';
 
-const createAnalytics = () => {
+const createAnalytics = (): object => {
   let counter = 0;
-  let destroyed = false;
+  let destroyed: boolean = false;
 
   console.log('test');
   
-  const listener = () => {
-    counter++;
-  }
+  const listener = ():number => counter++;
 
   $(document).on('click', listener);
 
@@ -27,4 +25,4 @@ const createAnalytics = () => {
   }
 }
 
-window.analytics = createAnalytics();
+window['analytics'] = createAnalytics();

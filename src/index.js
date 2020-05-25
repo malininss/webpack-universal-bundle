@@ -5,7 +5,10 @@ import './styles/styles.css'; // Пример импорта .css
 import AngularLogo from './assets/image' // Пример импорта картинок
 // import xml from './assets/data.xml' // Пример импорта XML
 // import csv from './assets/data.csv' // Пример импорта csv-файла
+import './styles/scss.scss';
+import './styles/less.less';
 
+import './babel';
 
 const post = new Post('Webpack Post Title', AngularLogo);
 
