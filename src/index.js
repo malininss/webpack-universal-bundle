@@ -1,22 +1,47 @@
+// В index.js должны подключаться все библиотеки, стили и т.п.
+
+
+// Обязательно импортируем babel
+import './babel';
+
+// Пример подключения jquery-библиотеки
 import * as $ from 'jquery'
-import Post from '@models/Post'; // Пример импорта .js файла
-// import json from './assets/json.json' // Пример импорта json
-import './styles/styles.css'; // Пример импорта .css
-import AngularLogo from './assets/image' // Пример импорта картинок
-// import xml from './assets/data.xml' // Пример импорта XML
-// import csv from './assets/data.csv' // Пример импорта csv-файла
+
+ // Пример импорта .js файла. Папка @models указывается в webpack.config.js в ключе alias
+import Post from '@models/Post';
+
+// Пример импорта .css, .scss, .less
+import './styles/styles.css';
 import './styles/scss.scss';
 import './styles/less.less';
 
-import './babel';
+// Пример импорта картинки. 
+// Расширение .png можно не указывать, т.к. мы его добавили в resolve extensions в webpack.config.js
+import webpackLogo from './assets/image';
 
-const post = new Post('Webpack Post Title', AngularLogo);
+// Пример импорта json-файла
+import json from './assets/json.json'
 
+// Пример импорта XML
+import xml from './assets/data.xml'
+
+// Пример импорта CSV
+import csv from './assets/data.csv'
+
+
+
+
+// Пример создания экземпляра объекта класс Post, который мы импортировали в файл
+const post = new Post('Webpack Post Title', webpackLogo);
+
+// Пример использования jquery
 $('pre').addClass('code').html(post.toString());
-// console.log('Post to string:', post.toString());
-// console.log('JSON:', json);
-// console.log('XML', xml);
-// console.log('csv', csv);
+
+// Примеры работы с файлами:
+console.log('Post to string:', post.toString());
+console.log('JSON:', json);
+console.log('XML', xml);
+console.log('csv', csv);
 
  
 

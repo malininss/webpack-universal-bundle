@@ -1,3 +1,6 @@
+// Пример скрипта, который должен подключиться отдельно.
+// Пример подключения jquery.
+
 import * as $ from 'jquery';
 
 const createAnalytics = (): object => {

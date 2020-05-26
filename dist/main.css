@@ -1,6 +1,8 @@
+@font-face {
+  font-family: 'Roboto';
+  src: url(03523cf578d69fa923226ff457b92d90.ttf) format('truetype');
+}
 /* Тильда означает, что webpack ищует normalize.css в node_module. */
-@import "~normalize.css";
-@import "roboto.css";
 
 body {
   font-family: 'Roboto', sans-serif;
@@ -22,7 +24,7 @@ h1 {
   Если в weebpack.config установлен file-loader для изображений,
   ссылка на изображение скопируется в dist и подключется отдельно
   */
-  background-image: url('../assets/image.png');
+  background-image: url(09a1a1112c577c2794359715edfcb5ac.png);
   background-size: cover;
   height: 220px;
   width: 200px;
@@ -32,3 +34,26 @@ h1 {
 .code {
   color: crimson;
 }
+.card {
+  padding: 1rem;
+  border-radius: 5px;
+  margin-top: 1rem;
+  border: 1px solid red;
+}
+.card h2 {
+  text-align: center;
+  color: darkred;
+}
+.box {
+  padding: 1rem;
+  border-radius: 5px;
+  margin-top: 1rem;
+  border: 1px solid red;
+}
+.box h2 {
+  text-align: center;
+  color: darkblue;
+}
+
+
+/*# sourceMappingURL=main.css.map*/

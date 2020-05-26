@@ -1,3 +1,5 @@
+// Пример файла, который должен обработать babel для поддержки в старых брауерах.
+
 async function start() {
   return await Promise.resolve('async is working');
 }

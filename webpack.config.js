@@ -1,25 +1,50 @@
-const path = require('path'); // Встроенные в node.js модуль для работы с пути
-const HTMLWebpackPlugin = require('html-webpack-plugin'); // Плагин для работы с HTML
-const {CleanWebpackPlugin} = require('clean-webpack-plugin'); // Плагин для отчистки рабочей папки
-const CopyWebpackPlugin = require('copy-webpack-plugin') // Плагин для копирования файлов и папок из src в dist без изменений
-const MiniCssExtractPlugin = require('mini-css-extract-plugin')  // Если мы хотим, чтобы css скрипты подключались отедльными файлам, а не в HTML
-const OptimizeCssAssetsWebpackPlugin = require('optimize-css-assets-webpack-plugin'); // Плагин для оптимизации и минификации CSS
+// Встроенные в node.js модуль для работы с путями
+const path = require('path');
+
+ // Плагин для работы с HTML
+const HTMLWebpackPlugin = require('html-webpack-plugin');
+
+// Плагин для очистки рабочей папки
+const {CleanWebpackPlugin} = require('clean-webpack-plugin');
+
+// Плагин для копирования файлов и папок из src в dist без изменений
+const CopyWebpackPlugin = require('copy-webpack-plugin') 
+
+// Плагин для подключения скриптов отдельными файлами, а не в HTML
+const MiniCssExtractPlugin = require('mini-css-extract-plugin')
+
+// Плагин для оптимизации и минификации CSS
+const OptimizeCssAssetsWebpackPlugin = require('optimize-css-assets-webpack-plugin');
+
+// Плагин для минификации JS
 const TerserWebpackPlugin = require('terser-webpack-plugin');
-const {BundleAnalyzerPlugin} = require('webpack-bundle-analyzer'); // Для анализа бандла в прод
+
+// Плагин, для анализа бандла, идущего в продакшн
+const {BundleAnalyzerPlugin} = require('webpack-bundle-analyzer'); 
 
 
-const isDev = process.env.NODE_ENV === 'development' // Нужен для параметра hmr у MiniCssExtractPlugin, HTMLWebpackPlugin, devServer. Задаём с помощью пакета cross-env в package.json при запуске скриптов
+// Создаём переменную isDev, с помощью которой будем задавать определенные параметры сборки в зависимости сборки (dev)
+// Например, нужен для MiniCssExtractPlugin, HTMLWebpackPlugin, devServer. 
+// Задаётся с помощью пакета cross-env в package.json при запуске скриптов
+const isDev = process.env.NODE_ENV === 'development'
+// Аналогичная переменная, только используется для сборки в прод
 const isProd = !isDev;
 
-console.log('IS dev:', isDev); // Выведется при сборке
 
+// Отладочное сообщение, выдаётся в консоли при сборке:
+console.log('Is dev:', isDev); 
+
+
+// Функция, для возврата конфига параметров оптимизации. Вызывается ниже
 const optimization = () => {
   const config = {
     splitChunks: {
-      chunks: 'all' // Если в каких-то скриптах подключаются одинаковые библиотеки, они выносятся в vendors и подключаются отдельно
+      // Если в каких-то скриптах подключаются одинаковые библиотеки, они выносятся в vendors и подключаются один раз
+      chunks: 'all'
     },
   }
 
+  // Если сборка идёт в продакшн, минифицируем CSS и JS
   if (isProd) {
     config.minimizer = [
       new OptimizeCssAssetsWebpackPlugin(),
@@ -27,39 +52,48 @@ const optimization = () => {
     ]
   }
   return config;
-};
+}
 
-const babelOptions = (preset) => { // Опции для babel ниже
+
+// Функция, для возврата параметров для babel. Вызывается ниже
+const babelOptions = (preset) => { 
   const opts = {
     presets: [
-      '@babel/preset-env', // Нужно установить этот пресет  '@babel/preset-env' и "npm i -D @babel/polyfill"! в packega.json добавить "browserslist": "> 0.25%, not dead"
+      // Пресет настройки babel.
+      // Нужно установить @babel/preset-env и @babel/polyfill с флагом -D и добавить в package.json "browserslist": "> 0.25%, not dead"
+      '@babel/preset-env',
     ],
     plugins: [
-      '@babel/plugin-proposal-class-properties' // Планин для поддержки статических функций в классах
+      // Плагин для поддержки классов
+      '@babel/plugin-proposal-class-properties' 
     ]
   };
 
+  // В функцию можно опередать дополнительный пресет, тогда он вернётся в финальном конфиге
   if (preset) {
     opts.presets.push(preset);
   }
-  
   return opts;
-
 };
 
+
 // Шаблон filename для формировния js и css файлов. исользуется ниже.
-// Если мы в режиме разработкиЮ то хэши не нужны
+// Говорит, что, если мы в режиме разработки, хэши не нужны
 const filename = extention => isDev ? `[name].${extention}` : `[name].[hash].${extention}`;
 
 
-// Пишем загрузчик scss, less лоадеров, чтобы не дублировать код
+// Загрузчик scss, less лоадеров, чтобы не дублировать код
 const cssLoaders = extra => {
   const loaders = [
     {
       loader: MiniCssExtractPlugin.loader,
       options: {
-        hmr: isDev, //hot module replacement. Означет, что можем менять определенные сущности без перезагрузки страницы. Бывает нужно в режиме разработки. По умолчанию тут всегда true, чтобы использовать только в режиме разработки нужно добавить переменную const isDev = process.env.NODE_ENV === 'development' в начале страницы
-        reloadAll: true            },
+        // hmr - hot module replacement.
+        // Означет, что можем менять определенные сущности без перезагрузки страницы. Бывает нужно в режиме разработки.
+        // По умолчанию всегда true, используется только в режиме разработки из-а переменной isDev
+        hmr: isDev,
+        reloadAll: true            
+      },
     },
     'css-loader'
   ]
@@ -71,13 +105,17 @@ const cssLoaders = extra => {
   return loaders;
 }
 
-// Нужно, чтообы использовать eslint для файлов js. Нужно установить библиотеки eslint-loader, babel-eslint, eslint и создать в корне проекта файл .eslintrc
+// Функция для использлования eslint для файлов js.
+// Нужно установить библиотеки: eslint-loader, babel-eslint, eslint и создать в корне проекта файл .eslintrc
 const jsLoaders = () => {
+
+  // Стандартные значения
   const loaders = [{
     loader: 'babel-loader',
     options: babelOptions()
   }];
 
+  // Если в режиме разработки, то добавляем eslint
   if (isDev) {
     loaders.push('eslint-loader');
   }
@@ -85,40 +123,53 @@ const jsLoaders = () => {
   return loaders;
 }
 
+
+// Функция для возврата массива плагинов. Вынесена отдельно для удобства
 const plugins = () => {
- const base = [
-  new HTMLWebpackPlugin({
-    template: './index.html',
-    minify: {
-      collapseWhitespace: isProd // Оптимизируем html, если идём в продакшн
-    }
-  }),
-  new CleanWebpackPlugin(),
-  new CopyWebpackPlugin( {
-    patterns: [
-      {
-        from: path.resolve(__dirname, 'src/favicon.ico'), // Откуда копируем папку или файл
-        to: path.resolve(__dirname, 'dist') // Куда копируем
+  // Базовые настройки
+  const base = [
+    new HTMLWebpackPlugin({
+      template: './index.html',
+      minify: {
+        // Если сборка в продакшн, оптимизируем и минифицируем html
+        collapseWhitespace: isProd
       }
-    ]
-  }),
-  new MiniCssExtractPlugin({
-    filename: filename('css')
-  }) // Если мы хотим, чтобы css скрипты подключались отедльными файлам, а не в HTML
-]
+    }),
+    new CleanWebpackPlugin(),
+    new CopyWebpackPlugin( {
+      patterns: [
+        {
+          // Задаём параерты, какие файлы и папки копировать и куда
+          from: path.resolve(__dirname, 'src/favicon.ico'), // Откуда копируем
+          to: path.resolve(__dirname, 'dist') // Куда копируем
+        }
+      ]
+    }),
+    // Добавляем для того, чтобы css подключались отдельными файлами, а не в HTML
+    new MiniCssExtractPlugin({
+      filename: filename('css')
+    })
+  ]
 
-if (isProd) {
-  base.push(new BundleAnalyzerPlugin()); // библиотека, для просмотра статистики, сколько занимает та или иная библиотека
+  // Если идём в прод, подключаем библиотеку для просмотра статистики.
+  // Показывает сколько занимает места та или иная библиотека
+  if (isProd) {
+    base.push(new BundleAnalyzerPlugin());
+  }
+  return base;
+
 }
-return base;
 
-}
-
+// Настроки самого webpack
 module.exports = {
-  context: path.resolve(__dirname, 'src') , // Указываем, от какой папки указны пути ниже. То есть не ./src/index.js, а  ./index.js
+  // Указываем, от какой папки будут оуказаны пути ниже.
+  // Например, можем писать не ./src/index.js, а ./index.js
+  context: path.resolve(__dirname, 'src'),
   mode: 'development',
   entry: {
-    main: ['@babel/polyfill','./index.js'], // Если используем babel, то тут массив и '@babel/polyfill'. Если нето, то просто  main: './index.js'
+    // Если используем babel, ключ main должен быть массивом со значениеми '@babel/polyfill' и './index.js'.
+    // Если babel не используем, то просто main: './index.js'
+    main: ['@babel/polyfill','./index.js'],
     analytics: './analytics.ts'
   },
   output: {
@@ -126,67 +177,88 @@ module.exports = {
     path: path.resolve(__dirname, 'dist')
   },
   resolve: {
-    // Extensons Говорим вебпаку, какие расширения пинимаем по умолчанию при импорте (чтобы можно было не указывать расширения)
+    // Extensions говорт вебпаку, какие расширения пинимаем по умолчанию при импорте (чтобы можно было не указывать расширения)
     extensions: ['.js', '.json', '.png'],
     // Alias позволяет добавить путь до папки с js-файлами, например, классами.
-    // Используется при импорте, например: import from "@models/Post"
+    // Используется при импорте, например: import from "@models/Post" (класс добавлен здесь для примера)
     alias: {
       '@models': path.resolve(__dirname, 'src/models'),
       '@': path.resolve(__dirname, 'src')
     } 
   },
   optimization: optimization(),
-  // devServer - нужен для автоматической перезагрузки браузера. Для использования нужно установить пакет webpack-dev-server и добавить скрипт в package.json
+  // devServer - нужен для автоматической перезагрузки браузера.
+  // Для использования нужно установить пакет webpack-dev-server и добавить скрипт start в package.json
   devServer: {
     port: 4200,
-    hot: isDev // Добавляется если в режиме разработки
+    // Hot добавляется в режиме разработки
+    hot: isDev
   },
-  devtool: isDev ? 'source-map' : '', // Если мы в режиме разработки, добавляем карту, если нет, не добавляем
+  // Если находимся в режиме разработки, добавляем карту источников.
+  devtool: isDev ? 'source-map' : '',
   plugins: plugins(),
   module: {
     rules: [
       {
-        test: /\.css$/, // как только вебпак встречает в импортах css, загружаем модуль ниже
-        // use: ['style-loader', 'css-loader'] // webpack идёт справа налево. Сначала css-loader, затем style-loader. Лоадеры нужно предварительно установить. В данном случае стили подключается непосредственно в html тег style, а не ссылкой
+        // в ключе test с помощью регулярного выражения ищем файлы с расширениями.
+        // Елси фаайлы найдены, то для них используется плагин (loader), указанный в use  ниже
+        test: /\.css$/,
 
-        // Если мы хотим, чтобы стили были в отдельном айле, используем MiniCssExtractPlugin, как ниже:
+        // Если хотим, чтобы стили подключались в код HTML файлов, можно использоваться нижеуказанный use.
+        // Все лоадеры нужно предварительно установить. Также лоадеры читаются справа налове (сначала применяется css-loader, потом style-loader);
+        // use: ['style-loader', 'css-loader']
+
+        // Если стили нужны в отдельном файле, используем MiniCssExtractPlugin.
+        // Все параметры возвращаются из отдельной функции cssLoaders в начале этого скрипта
         use: cssLoaders()
       },
       {
+        // лоадер для загрузки изображений
         test: /\.(png|jpg|svg|gif)/,
-        use: ['file-loader'] // лоадер для загрузки изображений
+        use: ['file-loader']
       },
       {
+        // Лоадер для загрузки и обработки шрифтов:
         test: /\.(ttf|woff}woff2|eot)$/,
-        use: ['file-loader'] // Обрабатываем шрифты
+        use: ['file-loader']
       },
       {
+        // Лоадер для чтения и работы с xml-файлами
         test: /\.xml$/,
-        use: ['xml-loader'] // плагин для чтения xml-файлов
+        use: ['xml-loader']
       },
       {
+        // Лоадер для работы с csv-файлами
         test: /\.csv$/,
-        use: ['csv-loader'] // плагин для чтения csv-файлов
+        use: ['csv-loader']
       },
       {
-        test: /\.s[ac]ss$/, // Учимся обрабатывать scss. Можно поменять на лесс
-        use: cssLoaders('sass-loader') // Чтобы работало, надо также установить sass-loader sass (npm i -D sass-loader, npm i -D sass);
+        // Лоадер для работы с SASS и SCSS
+        // Предвариетельно нужно установить sass-loader и sass (npm i -D sass-loader, npm i -D sass)
+        test: /\.s[ac]ss$/,
+        use: cssLoaders('sass-loader')
       },
       {
-        test: /\.less$/, // Учимся обрабатывать scss. Можно поменять на лесс
-        use: cssLoaders('less-loader')// Чтобы работало, надо также установить sass-loader sass (npm i -D less-loader, npm i -D less);
+        // Лоадер для работы с SASS и SCSS
+        // Предвариетельно нужно установить less-loader и less (npm i -D less-loader, npm i -D less)
+        test: /\.less$/, 
+        use: cssLoaders('less-loader')
       },
       {
-        test: /\.js$/, // Загружаем бабел. Для этого нужно установить npm install --save-dev babel-loader @babel/core
+        // Лоадер для использования babel
+        // Предвариетельно нужно установить npm install --save-dev babel-loader @babel/core
+        test: /\.js$/, 
         exclude: /node_modules/,
         use: jsLoaders()
       },
       {
-        test: /\.ts$/, // Добавляем поддержку тайп-скрипта 
+        // Лоадер для работы с тайп-скриптом
+        test: /\.ts$/,
         exclude: /node_modules/,
         loader: {
           loader: 'babel-loader',
-          options: babelOptions('@babel/preset-typescript') // '@babel/preset-typescript' -  Пресет поддержки TS
+          // Пресет babel для поддержки TS. Нужно предварительно установить '@babel/preset-typescript
+          options: babelOptions('@babel/preset-typescript')
         }
       }
     ]
